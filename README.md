@@ -1,19 +1,43 @@
 # 🎓 Smart Student Record Management System with AI Insights
 
-A full-stack intelligent student management system that combines traditional academic record-keeping with machine learning to predict student performance, detect at-risk students, and generate actionable insights for academic staff.
+A full-stack intelligent student management system that combines traditional academic
+record-keeping with machine learning to predict student performance, detect at-risk
+students, and generate actionable insights — with separate portals for academic staff
+and students.
+
+🔗 **Live demo:** _add your Render URL here after deploying_
+
+---
+
+## ✨ What it does
+
+**Two sides, one system:**
+
+- **Staff side** — admins and lecturers log in to manage students, enter grades &
+  attendance, and view an analytics dashboard. When a grade record is added, the AI
+  automatically predicts the final GPA, scores dropout risk, and writes a plain-English
+  insight — flagging at-risk students automatically.
+- **Student side** — students sign up with the Student ID & email the academic office
+  registered for them. The system **approves the account only if a matching staff-created
+  record exists**, then gives them a read-only dashboard of their own grades, attendance,
+  and feedback.
+
+Both staff and students log in through the **same login page** — the system routes each
+user to the correct dashboard automatically based on their account type.
 
 ---
 
 ## 🚀 Features
 
-- **Student CRUD Management** — Add, update, view, and archive student records
-- **AI Performance Prediction** — ML model predicts end-of-term GPA based on attendance, assignments, and midterm scores
-- **At-Risk Detection** — Automatically flags students likely to fail or drop out
-- **Smart Analytics Dashboard** — Visual charts for grade distributions, trends, and department comparisons
-- **AI Insight Reports** — Auto-generated natural language summaries per student
-- **REST API** — Full API for integration with other academic systems
-- **Role-Based Access** — Admin, lecturer, and student-view roles
-- **Export** — PDF and CSV report generation
+- **Student CRUD Management** — add, update, view, and archive student records
+- **Student Self-Service Portal** — sign up, auto-approval against school records, view own grades
+- **AI Performance Prediction** — predicts end-of-term GPA from attendance, assignments & midterm
+- **At-Risk Detection** — automatically flags students likely to fail or drop out
+- **Smart Analytics Dashboard** — charts for grade distribution, trends & department comparisons
+- **AI Insight Reports** — auto-generated natural-language summaries per student
+- **Role-Based Access** — admin, lecturer, and student roles
+- **REST API** — full JSON API for integration with other systems
+- **PDF Reports** — downloadable per-student academic reports
 
 ---
 
@@ -23,95 +47,83 @@ A full-stack intelligent student management system that combines traditional aca
 |---|---|---|
 | Performance Predictor | Predicts final GPA | Random Forest Regressor |
 | At-Risk Classifier | Flags at-risk students | Gradient Boosting Classifier |
-| Grade Trend Analyzer | Detects performance trends | Linear Regression |
-| Insight Generator | NLP summaries per student | Rule-based NLG + templates |
+| Insight Generator | Plain-English summaries per student | Rule-based NLG + templates |
+
+> Models are pre-trained on synthetic data and shipped as `.pkl` files, so predictions
+> work out of the box. The app falls back to a heuristic formula if the models are missing.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Python 3.10+, Flask, SQLAlchemy
+- **Backend:** Python 3.12, Flask, SQLAlchemy
 - **ML:** scikit-learn, pandas, numpy, joblib
 - **Frontend:** HTML5, Bootstrap 5, Chart.js
-- **Database:** SQLite (dev) / PostgreSQL (prod)
-- **Auth:** Flask-Login, bcrypt
-- **Reports:** ReportLab (PDF), csv module
+- **Database:** SQLite (dev) / PostgreSQL (production)
+- **Auth:** Flask-Login, Werkzeug password hashing
+- **Reports:** ReportLab (PDF)
+- **Server:** Gunicorn (production WSGI)
 
 ---
 
-## 📁 Project Structure
+## ⚡ Quick Start (Local)
 
-```
-smart_student_rms/
-├── app/
-│   ├── __init__.py          # App factory
-│   ├── routes/              # Flask blueprints
-│   │   ├── auth.py
-│   │   ├── students.py
-│   │   ├── dashboard.py
-│   │   └── api.py
-│   ├── models/              # SQLAlchemy models
-│   │   ├── user.py
-│   │   ├── student.py
-│   │   └── record.py
-│   ├── services/            # Business logic
-│   │   ├── ai_service.py    # ML predictions & insights
-│   │   ├── report_service.py
-│   │   └── analytics_service.py
-│   ├── templates/           # Jinja2 HTML templates
-│   └── static/              # CSS, JS, images
-├── ml/
-│   ├── train_model.py       # Model training script
-│   ├── predict.py           # Prediction utilities
-│   ├── data/                # Sample datasets
-│   └── models/              # Saved .pkl model files
-├── tests/                   # Unit & integration tests
-├── scripts/
-│   ├── seed_db.py           # Database seeder with fake data
-│   └── export_report.py
-├── docs/
-│   └── API.md
-├── config.py
-├── requirements.txt
-├── run.py
-└── README.md
-```
-
----
-
-## ⚡ Quick Start
-
-### 1. Clone & Setup Environment
 ```bash
-git clone https://github.com/yourusername/smart-student-rms.git
-cd smart_student_rms
+# 1. Clone & set up environment
+git clone https://github.com/EluFeR/Smart-Student-RMS.git
+cd Smart-Student-RMS
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS/Linux
 pip install -r requirements.txt
-```
 
-### 2. Configure Environment
-```bash
+# 2. (Optional) configure environment
 cp .env.example .env
-# Edit .env with your settings
-```
 
-### 3. Initialize Database & Seed Data
-```bash
+# 3. Seed the database with demo data
 python scripts/seed_db.py
-```
 
-### 4. Train the ML Models
-```bash
+# 4. (Optional) retrain the ML models
 python ml/train_model.py
-```
 
-### 5. Run the App
-```bash
+# 5. Run
 python run.py
 ```
-Visit `http://localhost:5000`  
-Default admin login: `admin@school.edu` / `admin123`
+
+Visit **http://localhost:5000**
+
+**Default logins:**
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@school.edu` | `admin123` |
+| Lecturer | `alice@school.edu` | `lecturer123` |
+
+> Students don't have default logins — they sign up via the portal using a seeded
+> student's ID and email (open any student as staff to find valid credentials).
+
+---
+
+## 👥 How accounts work
+
+| | Staff (admin / lecturer) | Students |
+|---|---|---|
+| **Created by** | An admin via **Manage Users** | They sign up themselves |
+| **Approval** | Active immediately | Auto-approved only if staff already added a matching record |
+| **Access** | Manage students, grades, analytics | Read-only view of their own record |
+
+---
+
+## ☁️ Deployment (Render)
+
+This repo is deploy-ready for [Render](https://render.com) via `render.yaml`.
+
+1. Push the repo to GitHub.
+2. On Render: **New → Blueprint** → select this repo → **Apply**.
+3. Render provisions a PostgreSQL database, installs dependencies, seeds data, and starts
+   Gunicorn automatically.
+
+`SECRET_KEY` is auto-generated and `DATABASE_URL` is injected by Render — no manual config
+needed. **After your first deploy, log in and change the default admin password.**
 
 ---
 
@@ -126,27 +138,17 @@ Default admin login: `admin@school.edu` / `admin123`
 | DELETE | `/api/students/<id>` | Delete student |
 | GET | `/api/students/<id>/predict` | AI performance prediction |
 | GET | `/api/analytics/summary` | Dashboard analytics |
-| POST | `/api/reports/generate` | Generate PDF report |
-
-Full API docs: [docs/API.md](docs/API.md)
 
 ---
 
 ## 🧪 Running Tests
+
 ```bash
 pytest tests/ -v
 ```
 
 ---
 
-## 📊 ML Model Performance
-
-| Model | Accuracy / R² | Notes |
-|---|---|---|
-| Performance Predictor | R² = 0.87 | Trained on 2,000+ synthetic records |
-| At-Risk Classifier | Accuracy = 91% | Balanced dataset, F1=0.89 |
-
----
-
 ## 📄 License
+
 MIT License — free to use, modify, and distribute.
