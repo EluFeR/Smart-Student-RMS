@@ -1,0 +1,28 @@
+# Render deployment config — https://render.com/docs/blueprint-spec
+# Push this repo to GitHub, then in Render: New → Blueprint → pick the repo.
+# Render reads this file and provisions the database + web service automatically.
+
+databases:
+  - name: smartrms-db
+    plan: free          # free Postgres instance
+
+services:
+  - type: web
+    name: smartrms
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    # Seed the database on each deploy (the seeder skips if data already exists),
+    # then start the production WSGI server. $PORT is provided by Render.
+    startCommand: "python scripts/seed_db.py && gunicorn wsgi:app --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true          # Render generates a strong random key
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: smartrms-db
+          property: connectionString

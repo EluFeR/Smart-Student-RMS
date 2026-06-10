@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Register User — Smart Student RMS{% endblock %}
+{% block page_title %}Create User Account{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px;">
+  <div class="card-header">New Staff Account</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Full Name</label>
+        <input type="text" name="name" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Role</label>
+        <select name="role" class="form-select">
+          <option value="lecturer">Lecturer</option>
+          <option value="admin">Admin</option>
+          <option value="viewer">Viewer</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Department</label>
+        <input type="text" name="department" class="form-control" />
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Create Account</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

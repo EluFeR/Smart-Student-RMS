@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Smart Student RMS{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p class="text-muted small mb-1">Total Students</p>
+            <h3 class="fw-bold">{{ summary.total_students }}</h3>
+          </div>
+          <i class="fas fa-users fa-2x text-primary opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card success">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p class="text-muted small mb-1">Average GPA</p>
+            <h3 class="fw-bold">{{ summary.avg_gpa }}</h3>
+          </div>
+          <i class="fas fa-chart-line fa-2x text-success opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card warning">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p class="text-muted small mb-1">At-Risk Students</p>
+            <h3 class="fw-bold text-warning">{{ summary.at_risk_students }}</h3>
+          </div>
+          <i class="fas fa-exclamation-triangle fa-2x text-warning opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card danger">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p class="text-muted small mb-1">High AI Risk</p>
+            <h3 class="fw-bold text-danger">{{ summary.high_risk_count }}</h3>
+          </div>
+          <i class="fas fa-robot fa-2x text-danger opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">GPA Distribution</div>
+      <div class="card-body"><canvas id="gpaChart" height="200"></canvas></div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">AI Risk Breakdown</div>
+      <div class="card-body d-flex align-items-center justify-content-center">
+        <canvas id="riskChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">Department Performance (Avg GPA)</div>
+      <div class="card-body"><canvas id="deptChart" height="180"></canvas></div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header text-danger"><i class="fas fa-exclamation-triangle me-2"></i>At-Risk Students</div>
+      <div class="card-body p-0">
+        {% if at_risk_students %}
+        <ul class="list-group list-group-flush">
+          {% for s in at_risk_students %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <a href="{{ url_for('students.student_detail', student_id=s.id) }}" class="fw-semibold text-decoration-none">{{ s.full_name }}</a>
+              <br><small class="text-muted">{{ s.department }}</small>
+            </div>
+            <span class="badge bg-danger">GPA {{ s.current_gpa or '—' }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-center text-muted p-3">No at-risk students 🎉</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const gpaData = {{ gpa_dist | tojson }};
+  const riskData = {{ risk_breakdown | tojson }};
+  const deptData = {{ dept_stats | tojson }};
+
+  new Chart(document.getElementById('gpaChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(gpaData),
+      datasets: [{ label: 'Students', data: Object.values(gpaData),
+        backgroundColor: ['#dc3545','#fd7e14','#ffc107','#20c997','#0d6efd'] }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+
+  new Chart(document.getElementById('riskChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Low Risk', 'Moderate Risk', 'High Risk'],
+      datasets: [{ data: [riskData.low, riskData.moderate, riskData.high],
+        backgroundColor: ['#28a745','#ffc107','#dc3545'] }]
+    }
+  });
+
+  new Chart(document.getElementById('deptChart'), {
+    type: 'bar',
+    data: {
+      labels: deptData.map(d => d.department),
+      datasets: [{ label: 'Avg GPA', data: deptData.map(d => d.avg_gpa),
+        backgroundColor: '#1a73e8' }]
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } },
+      scales: { x: { max: 4.0, beginAtZero: true } } }
+  });
+</script>
+{% endblock %}

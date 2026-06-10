@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}{{ student.full_name }} — Smart Student RMS{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- Profile Card -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center pt-4">
+        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+             style="width:80px;height:80px;font-size:2rem;font-weight:700;">
+          {{ student.first_name[0] }}{{ student.last_name[0] }}
+        </div>
+        <h5 class="fw-bold">{{ student.full_name }}</h5>
+        <p class="text-muted mb-1"><code>{{ student.student_id }}</code></p>
+        {% if student.status == 'at_risk' %}
+          <span class="badge bg-danger mb-2">⚠️ At Risk</span>
+        {% elif student.status == 'graduated' %}
+          <span class="badge bg-primary mb-2">Graduated</span>
+        {% else %}
+          <span class="badge bg-success mb-2">Active</span>
+        {% endif %}
+        <hr />
+        <dl class="row text-start small">
+          <dt class="col-5">Department</dt><dd class="col-7">{{ student.department }}</dd>
+          <dt class="col-5">Program</dt><dd class="col-7">{{ student.program or '—' }}</dd>
+          <dt class="col-5">Year</dt><dd class="col-7">Year {{ student.year_of_study }}</dd>
+          <dt class="col-5">Email</dt><dd class="col-7"><a href="mailto:{{ student.email }}">{{ student.email }}</a></dd>
+          <dt class="col-5">Phone</dt><dd class="col-7">{{ student.phone or '—' }}</dd>
+          <dt class="col-5">Current GPA</dt>
+          <dd class="col-7 fw-bold {% if student.current_gpa and student.current_gpa >= 3.0 %}text-success{% elif student.current_gpa and student.current_gpa < 2.0 %}text-danger{% endif %}">
+            {{ student.current_gpa or '—' }}
+          </dd>
+        </dl>
+        <div class="d-grid gap-2 mt-3">
+          <a href="{{ url_for('students.edit_student', student_id=student.id) }}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-edit me-1"></i>Edit Profile
+          </a>
+          <a href="{{ url_for('students.download_report', student_id=student.id) }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-file-pdf me-1"></i>Download PDF Report
+          </a>
+          <a href="{{ url_for('students.add_record', student_id=student.id) }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i>Add Academic Record
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Academic Records & AI Insights -->
+  <div class="col-md-8">
+    <!-- Academic Records Table -->
+    <div class="card mb-4">
+      <div class="card-header">Academic Records</div>
+      <div class="card-body p-0">
+        {% if records %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 small">
+            <thead class="table-light">
+              <tr>
+                <th>Term</th><th>Attend.</th><th>Assignments</th>
+                <th>Midterm</th><th>Final</th><th>GPA</th>
+                <th>AI Pred. GPA</th><th>Risk</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in records %}
+              <tr>
+                <td>{{ r.term }} {{ r.term_year }}</td>
+                <td>
+                  {% set att = (r.attendance_rate * 100) | int %}
+                  <span class="{% if att >= 75 %}text-success{% else %}text-danger{% endif %}">{{ att }}%</span>
+                </td>
+                <td>{{ '%.1f' % r.assignments_avg if r.assignments_avg else '—' }}</td>
+                <td>{{ '%.1f' % r.midterm_score if r.midterm_score else '—' }}</td>
+                <td>{{ '%.1f' % r.final_score if r.final_score else '—' }}</td>
+                <td class="fw-bold {% if r.gpa and r.gpa >= 3.0 %}text-success{% elif r.gpa and r.gpa < 2.0 %}text-danger{% endif %}">
+                  {{ '%.2f' % r.gpa if r.gpa else '—' }}
+                </td>
+                <td class="text-primary">{{ '%.2f' % r.ai_predicted_gpa if r.ai_predicted_gpa else '—' }}</td>
+                <td>
+                  {% if r.ai_risk_score is not none %}
+                    {% set risk_pct = (r.ai_risk_score * 100) | int %}
+                    {% if r.ai_risk_score < 0.3 %}
+                      <span class="badge badge-risk-low">{{ risk_pct }}%</span>
+                    {% elif r.ai_risk_score < 0.6 %}
+                      <span class="badge badge-risk-moderate">{{ risk_pct }}%</span>
+                    {% else %}
+                      <span class="badge badge-risk-high">{{ risk_pct }}%</span>
+                    {% endif %}
+                  {% else %}—{% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-center text-muted p-4">No academic records yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- AI Insights -->
+    {% if records %}
+    <div class="card">
+      <div class="card-header"><i class="fas fa-robot me-2 text-primary"></i>AI Insights</div>
+      <div class="card-body">
+        {% for r in records[:3] %}
+        {% if r.ai_insight %}
+        <div class="border-start border-primary border-3 ps-3 mb-3">
+          <small class="text-muted fw-semibold">{{ r.term }} {{ r.term_year }}</small>
+          <p class="mb-0 mt-1 small">{{ r.ai_insight }}</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

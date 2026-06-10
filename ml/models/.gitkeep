@@ -1,0 +1,2 @@
+# ML Models directory
+# Run: python ml/train_model.py to generate .pkl files here

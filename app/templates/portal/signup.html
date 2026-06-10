@@ -1,0 +1,46 @@
+{% import "portal/_helpers.html" as h %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {{ h.head() }}
+  <title>Student Sign Up — Smart Student RMS</title>
+</head>
+<body>
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5" style="background: linear-gradient(135deg, #0f5132 0%, #198754 100%);">
+  <div class="card shadow-lg" style="width: 430px; border-radius: 16px;">
+    <div class="card-body p-5">
+      <div class="text-center mb-4">
+        <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+        <h4 class="fw-bold">Create Student Account</h4>
+        <p class="text-muted small">Use the Student ID & email the academic office registered for you.</p>
+      </div>
+      {{ h.flashes() }}
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Student ID</label>
+          <input type="text" name="student_id" class="form-control" placeholder="STU-2024-0001" required />
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Email</label>
+          <input type="email" name="email" class="form-control" placeholder="your@school.edu" required />
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Choose a Password</label>
+          <input type="password" name="password" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+          <i class="fas fa-check-circle me-2"></i>Sign Up
+        </button>
+      </form>
+      <p class="text-muted small mt-3 mb-2 text-center">
+        <i class="fas fa-shield-halved me-1"></i>
+        We verify your details against school records before approving.
+      </p>
+      <p class="text-center small mb-0">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
